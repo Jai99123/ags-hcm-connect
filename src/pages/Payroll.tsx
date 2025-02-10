@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableBody,
@@ -21,11 +20,17 @@ import { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eye } from "lucide-react";
 
 const Payroll = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [showTaxHistory, setShowTaxHistory] = useState(false);
+
+  const handleViewPayslip = () => {
+    toast.info("Payslip details will be available shortly");
+  };
 
   // Mock data for demonstration
   const payHistory = [
@@ -68,158 +73,109 @@ const Payroll = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      <h1 className="text-3xl font-bold mb-6">Payroll Management</h1>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Pay Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pay</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h3 className="font-medium mb-2">Jan 2025</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                The detailed view will be available shortly. In the meantime you can
+                download your payslip.
+              </p>
+              <div className="flex gap-3">
+                <Button onClick={handleViewPayslip}>View Payslip</Button>
+                <Button variant="outline">Pay History</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Pay Section */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">Pay Details</h2>
-        <div className="grid gap-4">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>View Current Pay</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Current Pay Details</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Label>Basic Pay</Label>
-                  <span>₹50,000</span>
-                  <Label>Deductions</Label>
-                  <span>₹5,000</span>
-                  <Label>Net Pay</Label>
-                  <span>₹45,000</span>
+        {/* Tax Section */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle>Tax</CardTitle>
+            <Button variant="ghost" size="icon">
+              <Eye className="h-4 w-4" />
+              <span className="sr-only">Show</span>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h3 className="text-sm font-medium">YTD</h3>
+              <div className="space-y-3 mt-2">
+                <div>
+                  <Label className="text-sm">Taxable Income (EST)</Label>
+                  <p className="text-xl font-semibold">₹600,000</p>
+                </div>
+                
+                <div className="bg-green-50 p-3 rounded-md">
+                  <Label className="text-sm">Tax Paid</Label>
+                  <p className="text-sm">(till Feb 2025)</p>
+                  <p className="text-xl font-semibold">₹33,000</p>
+                </div>
+
+                <div className="bg-orange-50 p-3 rounded-md">
+                  <Label className="text-sm">Total Tax Due (EST)</Label>
+                  <p className="text-xl font-semibold">₹25,000</p>
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
+              <Button className="mt-4" variant="outline">
+                Tax Statement
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-          <div className="border rounded-lg p-4">
-            <h3 className="text-lg font-medium mb-4">Pay History</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Basic Pay</TableHead>
-                  <TableHead>Deductions</TableHead>
-                  <TableHead>Net Pay</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payHistory.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.date}</TableCell>
-                    <TableCell>₹{item.basicPay}</TableCell>
-                    <TableCell>₹{item.deductions}</TableCell>
-                    <TableCell>₹{item.netPay}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      </section>
-
-      {/* Tax Section */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">Tax Management</h2>
-        <div className="grid gap-4">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline">Select Tax Options</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Tax Options</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="flex items-center gap-2">
-                  <input type="radio" id="oldRegime" name="taxRegime" />
-                  <Label htmlFor="oldRegime">Old Tax Regime</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input type="radio" id="newRegime" name="taxRegime" />
-                  <Label htmlFor="newRegime">New Tax Regime</Label>
-                </div>
+        {/* Claims Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Claim submissions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Submission window will open on
+            </p>
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <h4 className="font-medium">Claims</h4>
+                <p className="text-sm text-muted-foreground">0</p>
               </div>
-            </DialogContent>
-          </Dialog>
-
-          <Button variant="outline" onClick={() => setShowTaxHistory(true)}>
-            View Tax History
-          </Button>
-        </div>
-      </section>
-
-      {/* Financial Year Tax Data */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">Financial Year Tax Data</h2>
-        <div className="grid gap-4">
-          <div className="flex gap-4">
-            <div className="grid gap-2">
-              <Label>From Date</Label>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    {startDate ? format(startDate, "PPP") : "Pick a date"}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                  />
-                </DialogContent>
-              </Dialog>
+              <div>
+                <h4 className="font-medium">Submitted</h4>
+                <p className="text-sm text-muted-foreground">0</p>
+              </div>
+              <div>
+                <h4 className="font-medium">Limit</h4>
+                <p className="text-sm text-muted-foreground">₹50,000</p>
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label>To Date</Label>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline">
-                    {endDate ? format(endDate, "PPP") : "Pick a date"}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                  />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Financial Year</TableHead>
-                <TableHead>Total Income</TableHead>
-                <TableHead>Taxable Income</TableHead>
-                <TableHead>Tax Paid</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {taxData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.year}</TableCell>
-                  <TableCell>₹{item.totalIncome}</TableCell>
-                  <TableCell>₹{item.taxableIncome}</TableCell>
-                  <TableCell>₹{item.taxPaid}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          <div className="flex gap-4">
-            <Button onClick={handleImportData}>Import Data</Button>
-            <Button variant="outline">Export Data</Button>
+      {/* Tax Submissions Section */}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Tax submissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <p className="text-sm">
+              My tax structure FY 2024-2025:{" "}
+              <Button variant="link" className="p-0 h-auto font-normal">
+                New tax regime
+              </Button>
+            </p>
+            <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
+              Resubmission window open now
+            </span>
           </div>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
       {/* Tax History Dialog */}
       <Dialog open={showTaxHistory} onOpenChange={setShowTaxHistory}>
