@@ -76,6 +76,7 @@ const Payroll = () => {
 
   const [showPayslipUpload, setShowPayslipUpload] = useState(false);
   const [showTaxStatement, setShowTaxStatement] = useState(false);
+  const [showTaxStatementUpload, setShowTaxStatementUpload] = useState(false);
 
   const handleViewPayslip = () => {
     toast.info("Payslip details will be available shortly");
@@ -149,6 +150,17 @@ const Payroll = () => {
 
   const handleViewTaxStatement = () => {
     setShowTaxStatement(true);
+  };
+
+  const handleTaxStatementUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      toast.success(`Tax statement ${file.name} uploaded successfully`);
+    }
+  };
+
+  const handleDownloadTaxStatement = () => {
+    toast.success("Tax statement download started");
   };
 
   return (
@@ -449,6 +461,30 @@ const Payroll = () => {
             <DialogTitle>Tax Statement Details</DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Actions</h3>
+              <div className="flex gap-2">
+                {assignedTo === 'john_doe' && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowTaxStatementUpload(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Upload Statement
+                  </Button>
+                )}
+                <Button 
+                  variant="outline"
+                  onClick={handleDownloadTaxStatement}
+                  className="flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Statement
+                </Button>
+              </div>
+            </div>
+
             <div>
               <h3 className="text-lg font-semibold mb-4">Pay Structure</h3>
               <div className="grid grid-cols-2 gap-4">
@@ -499,6 +535,26 @@ const Payroll = () => {
                 <p className="text-xl font-bold">₹23,500</p>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showTaxStatementUpload} onOpenChange={setShowTaxStatementUpload}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Tax Statement</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4">
+              <Label htmlFor="taxStatementFile">Select Tax Statement File</Label>
+              <Input
+                id="taxStatementFile"
+                type="file"
+                onChange={handleTaxStatementUpload}
+                accept=".pdf,.doc,.docx"
+              />
+            </div>
+            <Button onClick={() => setShowTaxStatementUpload(false)}>Done</Button>
           </div>
         </DialogContent>
       </Dialog>
