@@ -12,6 +12,7 @@ import HiringOnboarding from "./pages/HiringOnboarding";
 import Employees from "./pages/Employees";
 import TimeTracking from "./pages/TimeTracking";
 import Payroll from "./pages/Payroll";
+import LMS from "./pages/LMS";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
                 <Route path="/employees" element={<Employees />} />
                 <Route path="/time-tracking" element={<TimeTracking />} />
                 <Route path="/payroll" element={<Payroll />} />
+                <Route path="/lms" element={<LMS />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
