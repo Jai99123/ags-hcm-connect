@@ -17,10 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "@/components/ui/use-toast";
-import { Link, LinkIcon } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Link, LinkIcon, Mail } from "lucide-react";
 
 const HiringOnboardingPage = () => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -51,21 +52,40 @@ const HiringOnboardingPage = () => {
   };
 
   const syncEmployeeData = (candidateData: any) => {
-    // In a real application, this would make API calls to update various systems
+    // Simulate syncing data across systems
     console.log("Syncing employee data across systems:");
     console.log("- Adding to Employee Information");
     console.log("- Setting up Time Tracking account");
     console.log("- Configuring Payroll information");
     console.log("- Creating LMS account");
     
-    // Show success notification
     toast({
       title: "Data Synced Successfully",
       description: "Employee information has been configured across all systems.",
     });
   };
 
+  const sendOnboardingEmail = (email: string, onboardingLink: string) => {
+    // In a real application, this would send an actual email
+    console.log(`Sending onboarding email to ${email}`);
+    console.log(`Onboarding link: ${onboardingLink}`);
+    
+    toast({
+      title: "Onboarding Email Sent",
+      description: `An email has been sent to ${email} with the onboarding link.`,
+    });
+  };
+
   const handleGenerateLink = () => {
+    if (!formData.email) {
+      toast({
+        title: "Error",
+        description: "Please enter candidate's email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Generate a unique link for the candidate
     const uniqueId = Math.random().toString(36).substring(7);
     const onboardingLink = `${window.location.origin}/onboarding/${uniqueId}`;
@@ -85,10 +105,12 @@ const HiringOnboardingPage = () => {
     // Sync data across systems
     syncEmployeeData(candidateData);
 
+    // Send onboarding email to candidate
+    sendOnboardingEmail(formData.email, onboardingLink);
+
     console.log("Candidate data:", candidateData);
     console.log("Onboarding link:", onboardingLink);
 
-    // Show success message with the generated link
     toast({
       title: "Link Generated Successfully",
       description: (
@@ -133,34 +155,14 @@ const HiringOnboardingPage = () => {
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="fullName" className="text-sm font-medium">Full Name</label>
-                  <Input 
-                    id="fullName" 
-                    placeholder="Enter candidate's full name" 
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium">Email Address</label>
+                  <label htmlFor="email" className="text-sm font-medium">Email Address *</label>
                   <Input 
                     id="email" 
                     type="email" 
-                    placeholder="Enter email address" 
+                    placeholder="Enter candidate's email address" 
                     value={formData.email}
                     onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="phone" className="text-sm font-medium">Phone Number</label>
-                  <Input 
-                    id="phone" 
-                    type="tel" 
-                    placeholder="Enter phone number" 
-                    value={formData.phone}
-                    onChange={handleInputChange}
+                    required
                   />
                 </div>
 
@@ -205,7 +207,7 @@ const HiringOnboardingPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="joiningDate" className="text-sm font-medium">Joining Date</label>
+                  <label htmlFor="joiningDate" className="text-sm font-medium">Expected Joining Date</label>
                   <Input 
                     id="joiningDate" 
                     type="date" 
@@ -215,7 +217,7 @@ const HiringOnboardingPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="salary" className="text-sm font-medium">Salary</label>
+                  <label htmlFor="salary" className="text-sm font-medium">Offered Salary</label>
                   <Input 
                     id="salary" 
                     type="number" 
@@ -266,8 +268,8 @@ const HiringOnboardingPage = () => {
               <div className="flex justify-end space-x-4">
                 <Button variant="outline" onClick={handleClearForm}>Clear Form</Button>
                 <Button onClick={handleGenerateLink}>
-                  <LinkIcon className="h-4 w-4 mr-2" />
-                  Generate Link
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Onboarding Link
                 </Button>
               </div>
             </form>
