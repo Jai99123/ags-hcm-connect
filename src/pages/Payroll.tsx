@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { toast } from "sonner";
 import { PayCard } from "@/components/payroll/PayCard";
@@ -113,7 +112,6 @@ const Payroll = () => {
 
   const handleSubmit = () => {
     toast.success("Tax submission sent for approval");
-    // Here you would typically send the data to your backend
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,19 +144,15 @@ const Payroll = () => {
     toast.success("Tax statement download started");
   };
 
-  // Define proper type for user roles
   type UserRole = 'hr' | 'payroll' | 'employee';
   
-  // Mock user role and ID - in a real app this would come from auth context
-  const currentUserRole: UserRole = "employee"; // Mock roles: "hr", "payroll", "employee"
-  const currentUserId = "user123"; // Mock user ID
+  const currentUserRole = 'employee' as UserRole;
+  const currentUserId = "user123";
 
-  // Helper function to check if user is HR or Payroll with proper type checking
   const isHRorPayroll = (): boolean => {
     return currentUserRole === 'hr' || currentUserRole === 'payroll';
   };
 
-  // Helper function to check if user is accessing their own records
   const isOwnRecord = (employeeId: string): boolean => {
     return currentUserId === employeeId;
   };
