@@ -63,15 +63,19 @@ const Index = () => {
     }
   });
 
-  // Fetch recent ideas from authenticated employees
+  // Fetch recent ideas with employee profile information
   const { data: recentIdeas } = useQuery({
     queryKey: ['recent-ideas'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('ideas')
         .select(`
-          *,
-          employee_profiles (
+          id,
+          title,
+          description,
+          created_at,
+          author_id,
+          author:employee_profiles!ideas_author_id_fkey (
             first_name,
             last_name,
             department_id
@@ -167,7 +171,7 @@ const Index = () => {
                       <div>
                         <h3 className="font-semibold">{idea.title}</h3>
                         <p className="text-sm text-gray-500 mt-1">
-                          By {idea.employee_profiles?.first_name} {idea.employee_profiles?.last_name}
+                          By {idea.author?.first_name} {idea.author?.last_name}
                         </p>
                         <p className="mt-2 text-sm">{idea.description}</p>
                       </div>
