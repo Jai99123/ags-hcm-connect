@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Index from "./pages/Index";
 import Careers from "./pages/Careers";
 import HiringOnboarding from "./pages/HiringOnboarding";
+import Employees from "./pages/Employees";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/hiring-onboarding" element={<HiringOnboarding />} />
+                <Route path="/employees" element={<Employees />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
