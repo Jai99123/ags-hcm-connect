@@ -48,17 +48,17 @@ const Payroll = () => {
   const taxData = [
     {
       id: 1,
+      year: "2024-25",
+      totalIncome: 700000,
+      taxableIncome: 600000,
+      taxPaid: 33000,
+    },
+    {
+      id: 2,
       year: "2023-24",
       totalIncome: 600000,
       taxableIncome: 500000,
       taxPaid: 25000,
-    },
-    {
-      id: 2,
-      year: "2022-23",
-      totalIncome: 550000,
-      taxableIncome: 450000,
-      taxPaid: 22500,
     },
   ];
 
