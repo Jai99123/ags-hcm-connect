@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +31,6 @@ const HiringOnboardingPage = () => {
     emailNote: "",
     department: "",
     salary: "",
-    workingHours: "",
     benefits: "",
   });
 
@@ -133,7 +131,6 @@ const HiringOnboardingPage = () => {
       emailNote: "",
       department: "",
       salary: "",
-      workingHours: "",
       benefits: "",
     });
   };
@@ -223,16 +220,6 @@ const HiringOnboardingPage = () => {
                     type="number" 
                     placeholder="Enter annual salary" 
                     value={formData.salary}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="workingHours" className="text-sm font-medium">Working Hours</label>
-                  <Input 
-                    id="workingHours" 
-                    placeholder="e.g., 9:00 AM - 5:00 PM" 
-                    value={formData.workingHours}
                     onChange={handleInputChange}
                   />
                 </div>
