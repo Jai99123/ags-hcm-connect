@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Careers from "./pages/Careers";
 import HiringOnboarding from "./pages/HiringOnboarding";
 import Employees from "./pages/Employees";
+import TimeTracking from "./pages/TimeTracking";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
                 <Route path="/careers" element={<Careers />} />
                 <Route path="/hiring-onboarding" element={<HiringOnboarding />} />
                 <Route path="/employees" element={<Employees />} />
+                <Route path="/time-tracking" element={<TimeTracking />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
