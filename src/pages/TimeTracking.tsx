@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Clock, Calendar, Timer, CheckCircle2, XCircle } from "lucide-react";
+import { Clock, Calendar, Timer, CheckCircle2, XCircle, Mail } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -61,6 +61,8 @@ const mockLeaveRequests = [
     endDate: "2024-03-26",
     status: "pending",
     managerEmail: "manager@example.com",
+    reason: "Medical appointment",
+    hrVisible: true,
   },
 ];
 
@@ -69,14 +71,13 @@ const TimeTrackingPage = () => {
   const [projects, setProjects] = useState(mockProjects);
   const [timeEntries, setTimeEntries] = useState(mockTimeEntries);
   const [leaveRequests, setLeaveRequests] = useState(mockLeaveRequests);
-  const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [newProject, setNewProject] = useState({ id: "", name: "" });
-  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [newLeave, setNewLeave] = useState({
     leaveType: "",
     startDate: "",
     endDate: "",
     reason: "",
+    managerEmail: "",
   });
 
   const handleAddProject = () => {
@@ -91,18 +92,34 @@ const TimeTrackingPage = () => {
 
     setProjects([...projects, newProject]);
     setNewProject({ id: "", name: "" });
-    setShowProjectDialog(false);
     toast({
       title: "Success",
       description: "Project added successfully",
     });
   };
 
+  const validateEmail = (email: string) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
+
   const handleLeaveRequest = () => {
-    if (!newLeave.leaveType || !newLeave.startDate || !newLeave.endDate) {
+    if (!newLeave.leaveType || !newLeave.startDate || !newLeave.endDate || !newLeave.managerEmail) {
       toast({
         title: "Error",
         description: "Please fill in all leave request details",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!validateEmail(newLeave.managerEmail)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid manager email address",
         variant: "destructive",
       });
       return;
@@ -113,7 +130,7 @@ const TimeTrackingPage = () => {
       employeeName: "Current User",
       ...newLeave,
       status: "pending",
-      managerEmail: "manager@example.com",
+      hrVisible: true,
     };
 
     setLeaveRequests([...leaveRequests, leaveRequest]);
@@ -122,8 +139,8 @@ const TimeTrackingPage = () => {
       startDate: "",
       endDate: "",
       reason: "",
+      managerEmail: "",
     });
-    setShowLeaveDialog(false);
     toast({
       title: "Success",
       description: "Leave request submitted successfully",
@@ -146,6 +163,12 @@ const TimeTrackingPage = () => {
     toast({
       title: approved ? "Leave Approved" : "Leave Rejected",
       description: `The leave request has been ${approved ? "approved" : "rejected"}.`,
+    });
+
+    // Notify HR (mock implementation)
+    toast({
+      title: "HR Notification",
+      description: `Leave request ${approved ? "approval" : "rejection"} has been sent to HR team.`,
     });
   };
 
@@ -308,6 +331,15 @@ const TimeTrackingPage = () => {
                     </div>
                   </div>
                   <div className="space-y-2">
+                    <label>Manager Email</label>
+                    <Input
+                      type="email"
+                      value={newLeave.managerEmail}
+                      onChange={(e) => setNewLeave({ ...newLeave, managerEmail: e.target.value })}
+                      placeholder="Enter manager's email address"
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <label>Reason</label>
                     <Input
                       value={newLeave.reason}
@@ -330,7 +362,9 @@ const TimeTrackingPage = () => {
                   <TableHead>Leave Type</TableHead>
                   <TableHead>Start Date</TableHead>
                   <TableHead>End Date</TableHead>
+                  <TableHead>Manager Email</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>HR Visible</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -342,8 +376,19 @@ const TimeTrackingPage = () => {
                     <TableCell>{request.startDate}</TableCell>
                     <TableCell>{request.endDate}</TableCell>
                     <TableCell>
+                      <div className="flex items-center">
+                        <Mail className="h-4 w-4 mr-2" />
+                        {request.managerEmail}
+                      </div>
+                    </TableCell>
+                    <TableCell>
                       <Badge variant={request.status === "approved" ? "default" : "secondary"}>
                         {request.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {request.hrVisible ? "Visible to HR" : "Hidden"}
                       </Badge>
                     </TableCell>
                     <TableCell>
