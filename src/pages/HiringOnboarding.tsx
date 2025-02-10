@@ -29,6 +29,10 @@ const HiringOnboardingPage = () => {
     status: "",
     joiningDate: "",
     emailNote: "",
+    department: "",
+    salary: "",
+    workingHours: "",
+    benefits: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -39,11 +43,26 @@ const HiringOnboardingPage = () => {
     }));
   };
 
-  const handleSelectChange = (value: string) => {
+  const handleSelectChange = (value: string, field: string) => {
     setFormData(prev => ({
       ...prev,
-      status: value
+      [field]: value
     }));
+  };
+
+  const syncEmployeeData = (candidateData: any) => {
+    // In a real application, this would make API calls to update various systems
+    console.log("Syncing employee data across systems:");
+    console.log("- Adding to Employee Information");
+    console.log("- Setting up Time Tracking account");
+    console.log("- Configuring Payroll information");
+    console.log("- Creating LMS account");
+    
+    // Show success notification
+    toast({
+      title: "Data Synced Successfully",
+      description: "Employee information has been configured across all systems.",
+    });
   };
 
   const handleGenerateLink = () => {
@@ -51,12 +70,20 @@ const HiringOnboardingPage = () => {
     const uniqueId = Math.random().toString(36).substring(7);
     const onboardingLink = `${window.location.origin}/onboarding/${uniqueId}`;
 
-    // Store the candidate information (in a real app, this would go to a backend)
+    // Create the complete candidate data object
     const candidateData = {
       ...formData,
       onboardingId: uniqueId,
       createdAt: new Date().toISOString(),
+      employeeId: `EMP${Math.floor(Math.random() * 10000)}`,
+      approvalStatus: "pending",
+      timeTrackingEnabled: true,
+      payrollStatus: "pending",
+      lmsAccess: true,
     };
+
+    // Sync data across systems
+    syncEmployeeData(candidateData);
 
     console.log("Candidate data:", candidateData);
     console.log("Onboarding link:", onboardingLink);
@@ -82,6 +109,10 @@ const HiringOnboardingPage = () => {
       status: "",
       joiningDate: "",
       emailNote: "",
+      department: "",
+      salary: "",
+      workingHours: "",
+      benefits: "",
     });
   };
 
@@ -144,8 +175,24 @@ const HiringOnboardingPage = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <label htmlFor="department" className="text-sm font-medium">Department</label>
+                  <Select onValueChange={(value) => handleSelectChange(value, 'department')} value={formData.department}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="hr">Human Resources</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <label htmlFor="status" className="text-sm font-medium">Status</label>
-                  <Select onValueChange={handleSelectChange} value={formData.status}>
+                  <Select onValueChange={(value) => handleSelectChange(value, 'status')} value={formData.status}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
@@ -163,6 +210,37 @@ const HiringOnboardingPage = () => {
                     id="joiningDate" 
                     type="date" 
                     value={formData.joiningDate}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="salary" className="text-sm font-medium">Salary</label>
+                  <Input 
+                    id="salary" 
+                    type="number" 
+                    placeholder="Enter annual salary" 
+                    value={formData.salary}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="workingHours" className="text-sm font-medium">Working Hours</label>
+                  <Input 
+                    id="workingHours" 
+                    placeholder="e.g., 9:00 AM - 5:00 PM" 
+                    value={formData.workingHours}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="benefits" className="text-sm font-medium">Benefits Package</label>
+                  <Input 
+                    id="benefits" 
+                    placeholder="Enter benefits package details" 
+                    value={formData.benefits}
                     onChange={handleInputChange}
                   />
                 </div>
