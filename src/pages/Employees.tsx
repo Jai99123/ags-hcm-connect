@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, CheckCircle2, XCircle, Mail } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -18,6 +18,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 // This would come from a backend in a real application
 const mockEmployees = [
@@ -29,6 +39,8 @@ const mockEmployees = [
     position: "Software Engineer",
     status: "active",
     joiningDate: "2024-03-01",
+    approvalStatus: "pending", // New field
+    managerEmail: "", // New field
   },
   {
     id: 2,
@@ -38,6 +50,8 @@ const mockEmployees = [
     position: "Product Manager",
     status: "pending",
     joiningDate: "2024-03-15",
+    approvalStatus: "pending", // New field
+    managerEmail: "", // New field
   },
 ];
 
@@ -52,10 +66,79 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getApprovalStatusColor = (status: string) => {
+  switch (status) {
+    case "approved":
+      return "text-green-500";
+    case "rejected":
+      return "text-red-500";
+    default:
+      return "text-yellow-500";
+  }
+};
+
 const EmployeesPage = () => {
+  const { toast } = useToast();
+  const [employees, setEmployees] = React.useState(mockEmployees);
+  const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
+  const [managerEmail, setManagerEmail] = React.useState("");
+
   const handleEdit = (employeeId: number) => {
     console.log("Edit employee:", employeeId);
     // Here you would typically open a modal or navigate to an edit form
+  };
+
+  const handleApproval = (employeeId: number, approved: boolean) => {
+    setEmployees(prev =>
+      prev.map(emp => {
+        if (emp.id === employeeId) {
+          return {
+            ...emp,
+            approvalStatus: approved ? "approved" : "rejected",
+          };
+        }
+        return emp;
+      })
+    );
+
+    toast({
+      title: approved ? "Candidate Approved" : "Candidate Rejected",
+      description: `The candidate has been ${approved ? "approved" : "rejected"} successfully.`,
+    });
+  };
+
+  const handleAssignManager = (employeeId: number) => {
+    if (!managerEmail) {
+      toast({
+        title: "Error",
+        description: "Please enter manager's email",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setEmployees(prev =>
+      prev.map(emp => {
+        if (emp.id === employeeId) {
+          return {
+            ...emp,
+            managerEmail,
+          };
+        }
+        return emp;
+      })
+    );
+
+    // Here you would typically send an email to the manager
+    console.log(`Sending approval request to manager: ${managerEmail}`);
+
+    toast({
+      title: "Manager Assigned",
+      description: `An approval request has been sent to ${managerEmail}`,
+    });
+
+    setManagerEmail("");
+    setSelectedEmployee(null);
   };
 
   return (
@@ -81,11 +164,13 @@ const EmployeesPage = () => {
                   <TableHead>Phone</TableHead>
                   <TableHead>Joining Date</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Approval Status</TableHead>
+                  <TableHead>Manager</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockEmployees.map((employee) => (
+                {employees.map((employee) => (
                   <TableRow key={employee.id}>
                     <TableCell className="font-medium">{employee.fullName}</TableCell>
                     <TableCell>{employee.position}</TableCell>
@@ -98,14 +183,77 @@ const EmployeesPage = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEdit(employee.id)}
-                        className="h-8 w-8"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
+                      <span className={getApprovalStatusColor(employee.approvalStatus)}>
+                        {employee.approvalStatus}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {employee.managerEmail || (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedEmployee(employee)}
+                            >
+                              Assign Manager
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Assign Manager</DialogTitle>
+                              <DialogDescription>
+                                Enter the manager's email address to send an approval request
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                              <Input
+                                placeholder="manager@company.com"
+                                value={managerEmail}
+                                onChange={(e) => setManagerEmail(e.target.value)}
+                              />
+                              <Button
+                                onClick={() => handleAssignManager(employee.id)}
+                                className="w-full"
+                              >
+                                Send Approval Request
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(employee.id)}
+                          className="h-8 w-8"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        {employee.managerEmail && employee.approvalStatus === "pending" && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleApproval(employee.id, true)}
+                              className="h-8 w-8 text-green-500"
+                            >
+                              <CheckCircle2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleApproval(employee.id, false)}
+                              className="h-8 w-8 text-red-500"
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
