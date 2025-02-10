@@ -5,11 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Upload, FileVideo, Book, GraduationCap, MessagesSquare } from "lucide-react";
+import { Plus, Upload, FileVideo, Book, GraduationCap, MessagesSquare, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const LMS = () => {
   const [selectedTab, setSelectedTab] = useState("courses");
+  const [ideaTitle, setIdeaTitle] = useState("");
+  const [ideaDescription, setIdeaDescription] = useState("");
+  const [department, setDepartment] = useState("");
+
+  const { data: ideas, refetch: refetchIdeas } = useQuery({
+    queryKey: ['ideas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ideas')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -18,16 +36,42 @@ const LMS = () => {
     }
   };
 
+  const handleSubmitIdea = async () => {
+    try {
+      const { error } = await supabase
+        .from('ideas')
+        .insert([
+          {
+            title: ideaTitle,
+            description: ideaDescription,
+            department,
+          }
+        ]);
+
+      if (error) throw error;
+
+      toast.success("Idea submitted successfully!");
+      setIdeaTitle("");
+      setIdeaDescription("");
+      setDepartment("");
+      refetchIdeas();
+    } catch (error) {
+      toast.error("Failed to submit idea");
+      console.error("Error submitting idea:", error);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Learning Management System</h1>
       
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid grid-cols-4 gap-4 w-full max-w-4xl">
+        <TabsList className="grid grid-cols-5 gap-4 w-full max-w-4xl">
           <TabsTrigger value="courses">Courses</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
           <TabsTrigger value="examinations">Examinations</TabsTrigger>
           <TabsTrigger value="qa">Q&A</TabsTrigger>
+          <TabsTrigger value="ideas">Ideas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="courses">
@@ -186,6 +230,82 @@ const LMS = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="ideas">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  Share Your Ideas
+                  <Button onClick={handleSubmitIdea}>
+                    <Lightbulb className="mr-2 h-4 w-4" />
+                    Submit Idea
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="idea-title">Title</Label>
+                    <Input
+                      id="idea-title"
+                      placeholder="Enter idea title"
+                      value={ideaTitle}
+                      onChange={(e) => setIdeaTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="idea-description">Description</Label>
+                    <Textarea
+                      id="idea-description"
+                      placeholder="Describe your idea..."
+                      value={ideaDescription}
+                      onChange={(e) => setIdeaDescription(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="department">Department</Label>
+                    <Input
+                      id="department"
+                      placeholder="Enter department"
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Ideas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {ideas?.map((idea) => (
+                    <div key={idea.id} className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">{idea.title}</h3>
+                          <p className="text-sm text-gray-500 mt-1">{idea.department}</p>
+                          <p className="mt-2">{idea.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-500">
+                            {new Date(idea.created_at).toLocaleDateString()}
+                          </span>
+                          <Button variant="outline" size="sm">
+                            Like ({idea.likes})
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

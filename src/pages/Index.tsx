@@ -1,6 +1,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Briefcase, GraduationCap, MessageSquare } from "lucide-react";
+import { Users, Briefcase, GraduationCap, MessageSquare, Lightbulb } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const stats = [
   {
@@ -30,6 +32,20 @@ const stats = [
 ];
 
 const Index = () => {
+  const { data: recentIdeas } = useQuery({
+    queryKey: ['recent-ideas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ideas')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   return (
     <div className="min-h-screen bg-background p-8 animate-fadeIn">
       <div className="container mx-auto">
@@ -61,6 +77,33 @@ const Index = () => {
               </Card>
             ))}
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5" />
+                Recent Ideas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentIdeas?.map((idea) => (
+                  <div key={idea.id} className="p-4 border rounded-lg">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold">{idea.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{idea.department}</p>
+                        <p className="mt-2 text-sm">{idea.description}</p>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {new Date(idea.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
