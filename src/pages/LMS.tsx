@@ -16,6 +16,23 @@ const LMS = () => {
   const [ideaDescription, setIdeaDescription] = useState("");
   const [department, setDepartment] = useState("");
 
+  const { data: currentUserProfile } = useQuery({
+    queryKey: ['current-user-profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data, error } = await supabase
+        .from('employee_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const { data: ideas, refetch: refetchIdeas } = useQuery({
     queryKey: ['ideas'],
     queryFn: async () => {
@@ -37,16 +54,20 @@ const LMS = () => {
   };
 
   const handleSubmitIdea = async () => {
+    if (!currentUserProfile) {
+      toast.error("You must be logged in to submit an idea");
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('ideas')
-        .insert([
-          {
-            title: ideaTitle,
-            description: ideaDescription,
-            department,
-          }
-        ]);
+        .insert({
+          title: ideaTitle,
+          description: ideaDescription,
+          department,
+          author_id: currentUserProfile.id
+        });
 
       if (error) throw error;
 
