@@ -25,7 +25,7 @@ const menuItems = [
   { title: "Dashboard", icon: Home, path: "/" },
   { title: "Employees", icon: Users, path: "/employees" },
   { title: "AGS Careers", icon: Briefcase, path: "/careers" },
-  { title: "Hiring & Onboarding", icon: UserPlus, path: "/hiring" },
+  { title: "Hiring & Onboarding", icon: UserPlus, path: "/hiring-onboarding" },
   { title: "Time Tracking", icon: Clock, path: "/time-tracking" },
   { title: "Payroll", icon: CreditCard, path: "/payroll" },
   { title: "LMS", icon: GraduationCap, path: "/lms" },
