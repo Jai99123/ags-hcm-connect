@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableBody,
@@ -164,23 +163,25 @@ const Payroll = () => {
     toast.success("Tax statement download started");
   };
 
+  // Define proper type for user roles
+  type UserRole = 'hr' | 'payroll' | 'employee';
+  
   // Mock user role and ID - in a real app this would come from auth context
-  const currentUserRole = "employee"; // Mock roles: "hr", "payroll", "employee"
+  const currentUserRole: UserRole = "employee"; // Mock roles: "hr", "payroll", "employee"
   const currentUserId = "user123"; // Mock user ID
 
-  // Helper function to check if user is HR or Payroll
-  const isHRorPayroll = () => {
-    return currentUserRole === "hr" || currentUserRole === "payroll";
+  // Helper function to check if user is HR or Payroll with proper type checking
+  const isHRorPayroll = (): boolean => {
+    return currentUserRole === 'hr' || currentUserRole === 'payroll';
   };
 
   // Helper function to check if user is accessing their own records
-  const isOwnRecord = (employeeId: string) => {
+  const isOwnRecord = (employeeId: string): boolean => {
     return currentUserId === employeeId;
   };
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      {/* First section - Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
@@ -193,12 +194,17 @@ const Payroll = () => {
                 The detailed view will be available shortly.
               </p>
               <div className="flex gap-3">
-                {isOwnRecord("user123") && (
-                  <Button onClick={handleDownloadPayslip} className="flex items-center gap-2">
+                {/* Show download option only for employee viewing their own record */}
+                {currentUserRole === 'employee' && isOwnRecord("user123") && (
+                  <Button 
+                    onClick={handleDownloadPayslip} 
+                    className="flex items-center gap-2"
+                  >
                     <Download className="h-4 w-4" />
                     Download Payslip
                   </Button>
                 )}
+                {/* Show upload option only for HR and Payroll team */}
                 {isHRorPayroll() && (
                   <Button 
                     variant="outline" 
@@ -275,7 +281,6 @@ const Payroll = () => {
         </Card>
       </div>
 
-      {/* Tax submissions section */}
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>Tax submissions</CardTitle>
@@ -428,7 +433,6 @@ const Payroll = () => {
         </CardContent>
       </Card>
 
-      {/* Tax History Dialog */}
       <Dialog open={showTaxHistory} onOpenChange={setShowTaxHistory}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -457,7 +461,6 @@ const Payroll = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Payslip Upload Dialog */}
       <Dialog open={showPayslipUpload} onOpenChange={setShowPayslipUpload}>
         <DialogContent>
           <DialogHeader>
@@ -478,7 +481,6 @@ const Payroll = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Tax Statement Dialog */}
       <Dialog open={showTaxStatement} onOpenChange={setShowTaxStatement}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -565,7 +567,6 @@ const Payroll = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Tax Statement Upload Dialog */}
       <Dialog open={showTaxStatementUpload} onOpenChange={setShowTaxStatementUpload}>
         <DialogContent>
           <DialogHeader>
