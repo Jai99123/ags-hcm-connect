@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "react-router-dom";
-import { file, messageSquare, eye, link, user } from "lucide-react";
+import { File, MessageSquare, Eye, Link as LinkIcon, User } from "lucide-react";
 
 const CareersPage = () => {
   const websiteLink = "https://www.adventglobal.com";
@@ -41,6 +41,11 @@ const CareersPage = () => {
     },
   ];
 
+  const handleApply = (jobId: string) => {
+    console.log(`Applying for job: ${jobId}`);
+    // TODO: Implement apply functionality
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="container mx-auto space-y-8">
@@ -54,7 +59,7 @@ const CareersPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <link className="h-5 w-5" />
+                <LinkIcon className="h-5 w-5" />
                 Career Website
               </CardTitle>
               <CardDescription>Direct applicants to our careers portal</CardDescription>
@@ -98,17 +103,24 @@ const CareersPage = () => {
                       <TableCell>{job.type}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
+                          <Button 
+                            variant="default" 
+                            size="sm" 
+                            onClick={() => handleApply(job.id)}
+                          >
+                            Apply
+                          </Button>
                           <Button variant="outline" size="icon" title="Upload Resume">
-                            <file className="h-4 w-4" />
+                            <File className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="icon" title="View Resumes">
-                            <eye className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="icon" title="Manager Comments">
-                            <messageSquare className="h-4 w-4" />
+                            <MessageSquare className="h-4 w-4" />
                           </Button>
                           <Button variant="outline" size="icon" title="Internal Application">
-                            <user className="h-4 w-4" />
+                            <User className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
