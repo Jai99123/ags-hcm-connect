@@ -17,6 +17,19 @@ const Payroll = () => {
   const [selectedInvestments, setSelectedInvestments] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
+  const isResubmissionWindowOpen = (): boolean => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    // Tax resubmission window is open from January to March for the previous financial year
+    // and July to September for revision of current financial year declarations
+    const isJanToMarch = currentMonth >= 0 && currentMonth <= 2;
+    const isJulyToSept = currentMonth >= 6 && currentMonth <= 8;
+    
+    return isJanToMarch || isJulyToSept;
+  };
+
   const investmentTypes = [
     { id: "hra", label: "HRA" },
     { id: "prevEmployer", label: "Previous Employer Income" },
@@ -170,6 +183,20 @@ const Payroll = () => {
         <TaxCard handleViewTaxStatement={handleViewTaxStatement} />
         <ClaimSubmissionsCard />
       </div>
+
+      {isResubmissionWindowOpen() && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm">
+            My tax structure FY 2024-2025:{" "}
+            <Button variant="link" className="p-0 h-auto font-normal">
+              New tax regime
+            </Button>
+          </p>
+          <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
+            Resubmission window open now
+          </span>
+        </div>
+      )}
 
       <TaxSubmissionsSection
         searchTerm={searchTerm}
