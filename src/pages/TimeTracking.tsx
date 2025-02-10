@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Clock, Calendar, Timer, CheckCircle2, XCircle } from "lucide-react";
 import {
@@ -197,9 +196,40 @@ const TimeTrackingPage = () => {
               <CardTitle>Project Codes</CardTitle>
               <CardDescription>Manage project codes and assignments</CardDescription>
             </div>
-            <DialogTrigger asChild onClick={() => setShowProjectDialog(true)}>
-              <Button variant="outline">Add Project</Button>
-            </DialogTrigger>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">Add Project</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Project</DialogTitle>
+                  <DialogDescription>
+                    Enter the project details below
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <label>Project Code</label>
+                    <Input
+                      value={newProject.id}
+                      onChange={(e) => setNewProject({ ...newProject, id: e.target.value })}
+                      placeholder="Enter project code"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label>Project Name</label>
+                    <Input
+                      value={newProject.name}
+                      onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+                      placeholder="Enter project name"
+                    />
+                  </div>
+                  <Button onClick={handleAddProject} className="w-full">
+                    Add Project
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardHeader>
           <CardContent>
             <Table>
@@ -234,9 +264,63 @@ const TimeTrackingPage = () => {
               <CardTitle>Leave Requests</CardTitle>
               <CardDescription>Request and manage leave applications</CardDescription>
             </div>
-            <DialogTrigger asChild onClick={() => setShowLeaveDialog(true)}>
-              <Button variant="outline">Request Leave</Button>
-            </DialogTrigger>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">Request Leave</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Request Leave</DialogTitle>
+                  <DialogDescription>
+                    Fill in the leave request details
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <Select
+                    onValueChange={(value) => setNewLeave({ ...newLeave, leaveType: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select leave type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Sick Leave">Sick Leave</SelectItem>
+                      <SelectItem value="Casual Leave">Casual Leave</SelectItem>
+                      <SelectItem value="Maternity Leave">Maternity Leave</SelectItem>
+                      <SelectItem value="Marriage Leave">Marriage Leave</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label>Start Date</label>
+                      <Input
+                        type="date"
+                        value={newLeave.startDate}
+                        onChange={(e) => setNewLeave({ ...newLeave, startDate: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label>End Date</label>
+                      <Input
+                        type="date"
+                        value={newLeave.endDate}
+                        onChange={(e) => setNewLeave({ ...newLeave, endDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label>Reason</label>
+                    <Input
+                      value={newLeave.reason}
+                      onChange={(e) => setNewLeave({ ...newLeave, reason: e.target.value })}
+                      placeholder="Enter reason for leave"
+                    />
+                  </div>
+                  <Button onClick={handleLeaveRequest} className="w-full">
+                    Submit Request
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardHeader>
           <CardContent>
             <Table>
@@ -290,95 +374,6 @@ const TimeTrackingPage = () => {
             </Table>
           </CardContent>
         </Card>
-
-        {/* Project Dialog */}
-        <Dialog open={showProjectDialog} onOpenChange={setShowProjectDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Project</DialogTitle>
-              <DialogDescription>
-                Enter the project details below
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label>Project Code</label>
-                <Input
-                  value={newProject.id}
-                  onChange={(e) => setNewProject({ ...newProject, id: e.target.value })}
-                  placeholder="Enter project code"
-                />
-              </div>
-              <div className="space-y-2">
-                <label>Project Name</label>
-                <Input
-                  value={newProject.name}
-                  onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
-                  placeholder="Enter project name"
-                />
-              </div>
-              <Button onClick={handleAddProject} className="w-full">
-                Add Project
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Leave Request Dialog */}
-        <Dialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Request Leave</DialogTitle>
-              <DialogDescription>
-                Fill in the leave request details
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <Select
-                onValueChange={(value) => setNewLeave({ ...newLeave, leaveType: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select leave type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Sick Leave">Sick Leave</SelectItem>
-                  <SelectItem value="Casual Leave">Casual Leave</SelectItem>
-                  <SelectItem value="Maternity Leave">Maternity Leave</SelectItem>
-                  <SelectItem value="Marriage Leave">Marriage Leave</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label>Start Date</label>
-                  <Input
-                    type="date"
-                    value={newLeave.startDate}
-                    onChange={(e) => setNewLeave({ ...newLeave, startDate: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label>End Date</label>
-                  <Input
-                    type="date"
-                    value={newLeave.endDate}
-                    onChange={(e) => setNewLeave({ ...newLeave, endDate: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label>Reason</label>
-                <Input
-                  value={newLeave.reason}
-                  onChange={(e) => setNewLeave({ ...newLeave, reason: e.target.value })}
-                  placeholder="Enter reason for leave"
-                />
-              </div>
-              <Button onClick={handleLeaveRequest} className="w-full">
-                Submit Request
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
