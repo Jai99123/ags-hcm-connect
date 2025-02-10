@@ -1,28 +1,10 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Search, Upload, Filter, Download } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { PayCard } from "@/components/payroll/PayCard";
+import { TaxCard } from "@/components/payroll/TaxCard";
+import { ClaimSubmissionsCard } from "@/components/payroll/ClaimSubmissionsCard";
+import { TaxDialogs } from "@/components/payroll/TaxDialogs";
+import { TaxSubmissionsSection } from "@/components/payroll/TaxSubmissionsSection";
 
 const Payroll = () => {
   const [startDate, setStartDate] = useState<Date>();
@@ -183,409 +165,54 @@ const Payroll = () => {
   return (
     <div className="container mx-auto p-6 space-y-8">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Pay</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-medium mb-2">Jan 2025</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                The detailed view will be available shortly.
-              </p>
-              <div className="flex gap-3">
-                {/* Show download option only for employee viewing their own record */}
-                {currentUserRole === 'employee' && isOwnRecord("user123") && (
-                  <Button 
-                    onClick={handleDownloadPayslip} 
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download Payslip
-                  </Button>
-                )}
-                {/* Show upload option only for HR and Payroll team */}
-                {isHRorPayroll() && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowPayslipUpload(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Upload className="h-4 w-4" />
-                    Upload Payslip
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle>Tax</CardTitle>
-            <Button variant="ghost" size="icon">
-              <Eye className="h-4 w-4" />
-              <span className="sr-only">Show</span>
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium">YTD</h3>
-              <div className="space-y-3 mt-2">
-                <div>
-                  <Label className="text-sm">Taxable Income (EST)</Label>
-                  <p className="text-xl font-semibold">₹600,000</p>
-                </div>
-                
-                <div className="bg-green-50 p-3 rounded-md">
-                  <Label className="text-sm">Tax Paid</Label>
-                  <p className="text-sm">(till Feb 2025)</p>
-                  <p className="text-xl font-semibold">₹33,000</p>
-                </div>
-
-                <div className="bg-orange-50 p-3 rounded-md">
-                  <Label className="text-sm">Total Tax Due (EST)</Label>
-                  <p className="text-xl font-semibold">₹25,000</p>
-                </div>
-              </div>
-              <Button className="mt-4" variant="outline" onClick={handleViewTaxStatement}>
-                Tax Statement
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Claim submissions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Submission window will open on
-            </p>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <h4 className="font-medium">Claims</h4>
-                <p className="text-sm text-muted-foreground">0</p>
-              </div>
-              <div>
-                <h4 className="font-medium">Submitted</h4>
-                <p className="text-sm text-muted-foreground">0</p>
-              </div>
-              <div>
-                <h4 className="font-medium">Limit</h4>
-                <p className="text-sm text-muted-foreground">₹50,000</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <PayCard
+          isHRorPayroll={isHRorPayroll}
+          isOwnRecord={isOwnRecord}
+          currentUserRole={currentUserRole}
+          handleDownloadPayslip={handleDownloadPayslip}
+          setShowPayslipUpload={setShowPayslipUpload}
+        />
+        <TaxCard handleViewTaxStatement={handleViewTaxStatement} />
+        <ClaimSubmissionsCard />
       </div>
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Tax submissions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <p className="text-sm">
-              My tax structure FY 2024-2025:{" "}
-              <Button variant="link" className="p-0 h-auto font-normal">
-                New tax regime
-              </Button>
-            </p>
-            <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
-              Resubmission window open now
-            </span>
-          </div>
+      <TaxSubmissionsSection
+        searchTerm={searchTerm}
+        handleSearch={handleSearch}
+        selectedStatus={selectedStatus}
+        setSelectedStatus={setSelectedStatus}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        selectedInvestments={selectedInvestments}
+        setSelectedInvestments={setSelectedInvestments}
+        selectedFile={selectedFile}
+        handleFileUpload={handleFileUpload}
+        assignedTo={assignedTo}
+        setAssignedTo={setAssignedTo}
+        handleSubmit={handleSubmit}
+        statusOptions={statusOptions}
+        investmentTypes={investmentTypes}
+        payrollPersonnel={payrollPersonnel}
+      />
 
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full md:w-1/3">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search investment number..."
-                className="pl-8"
-                value={searchTerm}
-                onChange={handleSearch}
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Filters
-              </Button>
-              <Button variant="outline">Columns</Button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Investment status</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {statusOptions.map((status) => (
-                <div key={status.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={status.id}
-                    checked={selectedStatus.includes(status.id)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedStatus([...selectedStatus, status.id]);
-                      } else {
-                        setSelectedStatus(
-                          selectedStatus.filter((id) => id !== status.id)
-                        );
-                      }
-                    }}
-                  />
-                  <Label htmlFor={status.id}>{status.label}</Label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Submission/Updated date</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="fromDate">From</Label>
-                <Input
-                  id="fromDate"
-                  type="date"
-                  placeholder="MM/DD/YYYY"
-                  value={startDate ? format(startDate, 'yyyy-MM-dd') : ''}
-                  onChange={(e) => setStartDate(new Date(e.target.value))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="toDate">To</Label>
-                <Input
-                  id="toDate"
-                  type="date"
-                  placeholder="MM/DD/YYYY"
-                  value={endDate ? format(endDate, 'yyyy-MM-dd') : ''}
-                  onChange={(e) => setEndDate(new Date(e.target.value))}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Investment type</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {investmentTypes.map((type) => (
-                <div key={type.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={type.id}
-                    checked={selectedInvestments.includes(type.id)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedInvestments([...selectedInvestments, type.id]);
-                      } else {
-                        setSelectedInvestments(
-                          selectedInvestments.filter((id) => id !== type.id)
-                        );
-                      }
-                    }}
-                  />
-                  <Label htmlFor={type.id}>{type.label}</Label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Document Upload</h3>
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                <Input
-                  type="file"
-                  onChange={handleFileUpload}
-                  className="max-w-md"
-                />
-                {selectedFile && (
-                  <span className="text-sm text-muted-foreground">
-                    {selectedFile.name}
-                  </span>
-                )}
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="assignTo">Assign to Payroll Personnel</Label>
-                <select
-                  id="assignTo"
-                  className="flex h-10 w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  value={assignedTo}
-                  onChange={(e) => setAssignedTo(e.target.value)}
-                >
-                  <option value="" disabled>Select a person</option>
-                  {payrollPersonnel.map(person => (
-                    <option key={person.id} value={person.id}>
-                      {person.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-4 pt-4">
-            <Button variant="outline">Clear</Button>
-            <Button onClick={handleSubmit}>Submit</Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Dialog open={showTaxHistory} onOpenChange={setShowTaxHistory}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Tax History</DialogTitle>
-          </DialogHeader>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Financial Year</TableHead>
-                <TableHead>Total Income</TableHead>
-                <TableHead>Taxable Income</TableHead>
-                <TableHead>Tax Paid</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {taxData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.year}</TableCell>
-                  <TableCell>₹{item.totalIncome}</TableCell>
-                  <TableCell>₹{item.taxableIncome}</TableCell>
-                  <TableCell>₹{item.taxPaid}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showPayslipUpload} onOpenChange={setShowPayslipUpload}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upload Payslip</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4">
-              <Label htmlFor="payslipFile">Select Payslip File</Label>
-              <Input
-                id="payslipFile"
-                type="file"
-                onChange={handlePayslipUpload}
-                accept=".pdf,.doc,.docx"
-              />
-            </div>
-            <Button onClick={() => setShowPayslipUpload(false)}>Done</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showTaxStatement} onOpenChange={setShowTaxStatement}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Tax Statement Details</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Actions</h3>
-              <div className="flex gap-2">
-                {isHRorPayroll() && (
-                  <Button 
-                    variant="outline"
-                    onClick={() => setShowTaxStatementUpload(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Upload className="h-4 w-4" />
-                    Upload Statement
-                  </Button>
-                )}
-                {isOwnRecord("user123") && (
-                  <Button 
-                    variant="outline"
-                    onClick={handleDownloadTaxStatement}
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download Statement
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Pay Structure</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Basic Pay</Label>
-                  <p className="text-lg">₹50,000</p>
-                </div>
-                <div>
-                  <Label>HRA</Label>
-                  <p className="text-lg">₹20,000</p>
-                </div>
-                <div>
-                  <Label>Special Allowance</Label>
-                  <p className="text-lg">₹15,000</p>
-                </div>
-                <div>
-                  <Label>Other Benefits</Label>
-                  <p className="text-lg">₹10,000</p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Tax Breakdown</h3>
-              <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <Label>Income Tax</Label>
-                  <p className="text-lg">₹25,000</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <Label>Professional Tax</Label>
-                  <p className="text-lg">₹2,500</p>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <Label>Surcharge</Label>
-                  <p className="text-lg">₹1,000</p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-md">
-                  <Label>Tax Deductions (Section 80C)</Label>
-                  <p className="text-lg">-₹5,000</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t pt-4">
-              <div className="flex justify-between items-center">
-                <Label className="text-lg font-semibold">Net Tax Payable</Label>
-                <p className="text-xl font-bold">₹23,500</p>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={showTaxStatementUpload} onOpenChange={setShowTaxStatementUpload}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Upload Tax Statement</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4">
-              <Label htmlFor="taxStatementFile">Select Tax Statement File</Label>
-              <Input
-                id="taxStatementFile"
-                type="file"
-                onChange={handleTaxStatementUpload}
-                accept=".pdf,.doc,.docx"
-              />
-            </div>
-            <Button onClick={() => setShowTaxStatementUpload(false)}>Done</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TaxDialogs
+        showTaxHistory={showTaxHistory}
+        setShowTaxHistory={setShowTaxHistory}
+        showPayslipUpload={showPayslipUpload}
+        setShowPayslipUpload={setShowPayslipUpload}
+        showTaxStatement={showTaxStatement}
+        setShowTaxStatement={setShowTaxStatement}
+        showTaxStatementUpload={showTaxStatementUpload}
+        setShowTaxStatementUpload={setShowTaxStatementUpload}
+        handlePayslipUpload={handlePayslipUpload}
+        handleTaxStatementUpload={handleTaxStatementUpload}
+        handleDownloadTaxStatement={handleDownloadTaxStatement}
+        isHRorPayroll={isHRorPayroll}
+        isOwnRecord={isOwnRecord}
+        taxData={taxData}
+      />
     </div>
   );
 };
