@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Pencil, CheckCircle2, XCircle, Mail } from "lucide-react";
+import { Pencil, CheckCircle2, XCircle } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -28,131 +28,184 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-
-// This would come from a backend in a real application
-const mockEmployees = [
-  {
-    id: 1,
-    fullName: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 234 567 8900",
-    position: "Software Engineer",
-    status: "active",
-    joiningDate: "2024-03-01",
-    approvalStatus: "pending", // New field
-    managerEmail: "", // New field
-  },
-  {
-    id: 2,
-    fullName: "Jane Smith",
-    email: "jane.smith@example.com",
-    phone: "+1 234 567 8901",
-    position: "Product Manager",
-    status: "pending",
-    joiningDate: "2024-03-15",
-    approvalStatus: "pending", // New field
-    managerEmail: "", // New field
-  },
-];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "active":
-      return "bg-green-500";
-    case "pending":
-      return "bg-yellow-500";
-    default:
-      return "bg-gray-500";
-  }
-};
-
-const getApprovalStatusColor = (status: string) => {
-  switch (status) {
-    case "approved":
-      return "text-green-500";
-    case "rejected":
-      return "text-red-500";
-    default:
-      return "text-yellow-500";
-  }
-};
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const EmployeesPage = () => {
   const { toast } = useToast();
-  const [employees, setEmployees] = React.useState(mockEmployees);
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
   const [managerEmail, setManagerEmail] = React.useState("");
 
-  const handleEdit = (employeeId: number) => {
-    console.log("Edit employee:", employeeId);
-    // Here you would typically open a modal or navigate to an edit form
-  };
+  // Fetch current user's profile to check if they are HR
+  const { data: currentUserProfile } = useQuery({
+    queryKey: ['current-user-profile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
 
-  const handleApproval = (employeeId: number, approved: boolean) => {
-    setEmployees(prev =>
-      prev.map(emp => {
-        if (emp.id === employeeId) {
-          return {
-            ...emp,
-            approvalStatus: approved ? "approved" : "rejected",
-          };
-        }
-        return emp;
-      })
-    );
+      const { data, error } = await supabase
+        .from('employee_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-    toast({
-      title: approved ? "Candidate Approved" : "Candidate Rejected",
-      description: `The candidate has been ${approved ? "approved" : "rejected"} successfully.`,
-    });
-  };
+      if (error) throw error;
+      return data;
+    }
+  });
 
-  const handleAssignManager = (employeeId: number) => {
-    if (!managerEmail) {
+  // Fetch employees based on user role
+  const { data: employees, isLoading } = useQuery({
+    queryKey: ['employees'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('employee_profiles')
+        .select(`
+          *,
+          department:departments(name)
+        `)
+        .order('last_name');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!currentUserProfile
+  });
+
+  const handleEdit = async (employee: any) => {
+    if (!currentUserProfile?.is_hr) {
       toast({
-        title: "Error",
-        description: "Please enter manager's email",
-        variant: "destructive",
+        title: "Access Denied",
+        description: "Only HR team members can edit employee information.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setSelectedEmployee(employee);
+  };
+
+  const handleApproval = async (employeeId: string, approved: boolean) => {
+    if (!currentUserProfile?.is_hr) {
+      toast({
+        title: "Access Denied",
+        description: "Only HR team members can approve/reject employees.",
+        variant: "destructive"
       });
       return;
     }
 
-    setEmployees(prev =>
-      prev.map(emp => {
-        if (emp.id === employeeId) {
-          return {
-            ...emp,
-            managerEmail,
-          };
-        }
-        return emp;
-      })
-    );
+    const { error } = await supabase
+      .from('employee_profiles')
+      .update({ status: approved ? 'active' : 'inactive' })
+      .eq('id', employeeId);
 
-    // Here you would typically send an email to the manager
-    console.log(`Sending approval request to manager: ${managerEmail}`);
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update employee status.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: approved ? "Employee Approved" : "Employee Rejected",
+      description: `The employee has been ${approved ? "approved" : "rejected"} successfully.`
+    });
+  };
+
+  const handleAssignManager = async (employeeId: string) => {
+    if (!currentUserProfile?.is_hr) {
+      toast({
+        title: "Access Denied",
+        description: "Only HR team members can assign managers.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!managerEmail) {
+      toast({
+        title: "Error",
+        description: "Please enter manager's email",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { data: manager, error: managerError } = await supabase
+      .from('employee_profiles')
+      .select('id')
+      .eq('email', managerEmail)
+      .single();
+
+    if (managerError || !manager) {
+      toast({
+        title: "Error",
+        description: "Manager not found with the provided email.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('employee_profiles')
+      .update({ manager_id: manager.id })
+      .eq('id', employeeId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign manager.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     toast({
       title: "Manager Assigned",
-      description: `An approval request has been sent to ${managerEmail}`,
+      description: `Manager has been successfully assigned.`
     });
 
     setManagerEmail("");
     setSelectedEmployee(null);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-8">
+        <div className="container mx-auto">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-muted rounded w-1/4"></div>
+            <div className="h-4 bg-muted rounded w-1/3"></div>
+            <div className="h-96 bg-muted rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="container mx-auto space-y-8">
         <div>
           <h1 className="text-4xl font-bold text-foreground mb-2">Employees</h1>
-          <p className="text-muted-foreground">Manage and view all employees</p>
+          <p className="text-muted-foreground">
+            {currentUserProfile?.is_hr 
+              ? "Manage and view all employees" 
+              : "View employee information"}
+          </p>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>Employee Directory</CardTitle>
-            <CardDescription>View and manage employee information</CardDescription>
+            <CardDescription>
+              {currentUserProfile?.is_hr 
+                ? "View and manage employee information" 
+                : "View employee information"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -160,107 +213,102 @@ const EmployeesPage = () => {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Position</TableHead>
+                  <TableHead>Department</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Joining Date</TableHead>
+                  <TableHead>Hire Date</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Approval Status</TableHead>
-                  <TableHead>Manager</TableHead>
-                  <TableHead>Actions</TableHead>
+                  {currentUserProfile?.is_hr && <TableHead>Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {employees.map((employee) => (
+                {employees?.map((employee) => (
                   <TableRow key={employee.id}>
-                    <TableCell className="font-medium">{employee.fullName}</TableCell>
+                    <TableCell className="font-medium">
+                      {employee.first_name} {employee.last_name}
+                    </TableCell>
                     <TableCell>{employee.position}</TableCell>
+                    <TableCell>{employee.department?.name || 'N/A'}</TableCell>
                     <TableCell>{employee.email}</TableCell>
-                    <TableCell>{employee.phone}</TableCell>
-                    <TableCell>{employee.joiningDate}</TableCell>
+                    <TableCell>{new Date(employee.hire_date).toLocaleDateString()}</TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(employee.status)}>
-                        {employee.status}
+                      <Badge 
+                        className={
+                          employee.status === 'active' 
+                            ? 'bg-green-500' 
+                            : employee.status === 'pending' 
+                            ? 'bg-yellow-500' 
+                            : 'bg-red-500'
+                        }
+                      >
+                        {employee.status || 'pending'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <span className={getApprovalStatusColor(employee.approvalStatus)}>
-                        {employee.approvalStatus}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {employee.managerEmail || (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedEmployee(employee)}
-                            >
-                              Assign Manager
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Assign Manager</DialogTitle>
-                              <DialogDescription>
-                                Enter the manager's email address to send an approval request
-                              </DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                              <Input
-                                placeholder="manager@company.com"
-                                value={managerEmail}
-                                onChange={(e) => setManagerEmail(e.target.value)}
-                              />
+                    {currentUserProfile?.is_hr && (
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(employee)}
+                            className="h-8 w-8"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          {employee.status === 'pending' && (
+                            <>
                               <Button
-                                onClick={() => handleAssignManager(employee.id)}
-                                className="w-full"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleApproval(employee.id, true)}
+                                className="h-8 w-8 text-green-500"
                               >
-                                Send Approval Request
+                                <CheckCircle2 className="h-4 w-4" />
                               </Button>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(employee.id)}
-                          className="h-8 w-8"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        {employee.managerEmail && employee.approvalStatus === "pending" && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleApproval(employee.id, true)}
-                              className="h-8 w-8 text-green-500"
-                            >
-                              <CheckCircle2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleApproval(employee.id, false)}
-                              className="h-8 w-8 text-red-500"
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </TableCell>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleApproval(employee.id, false)}
+                                className="h-8 w-8 text-red-500"
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
+
+        {selectedEmployee && (
+          <Dialog open={!!selectedEmployee} onOpenChange={() => setSelectedEmployee(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Assign Manager</DialogTitle>
+                <DialogDescription>
+                  Enter the manager's email address to assign them as the manager
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <Input
+                  placeholder="manager@company.com"
+                  value={managerEmail}
+                  onChange={(e) => setManagerEmail(e.target.value)}
+                />
+                <Button
+                  onClick={() => handleAssignManager(selectedEmployee.id)}
+                  className="w-full"
+                >
+                  Assign Manager
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );
