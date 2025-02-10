@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Pencil } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 // This would come from a backend in a real application
 const mockEmployees = [
@@ -51,6 +53,11 @@ const getStatusColor = (status: string) => {
 };
 
 const EmployeesPage = () => {
+  const handleEdit = (employeeId: number) => {
+    console.log("Edit employee:", employeeId);
+    // Here you would typically open a modal or navigate to an edit form
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="container mx-auto space-y-8">
@@ -74,6 +81,7 @@ const EmployeesPage = () => {
                   <TableHead>Phone</TableHead>
                   <TableHead>Joining Date</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -88,6 +96,16 @@ const EmployeesPage = () => {
                       <Badge className={getStatusColor(employee.status)}>
                         {employee.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEdit(employee.id)}
+                        className="h-8 w-8"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
