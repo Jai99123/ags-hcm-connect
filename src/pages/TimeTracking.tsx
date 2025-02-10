@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Clock, Calendar, Timer, CheckCircle2, XCircle, Mail } from "lucide-react";
+import { Clock, Calendar, Timer, CheckCircle2, XCircle, Mail, Fingerprint, Camera } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -34,6 +34,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 
 // Mock data - would come from backend in real implementation
 const mockProjects = [
@@ -79,6 +80,8 @@ const TimeTrackingPage = () => {
     reason: "",
     managerEmail: "",
   });
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [faceIdEnabled, setFaceIdEnabled] = useState(false);
 
   const handleAddProject = () => {
     if (!newProject.id || !newProject.name) {
@@ -172,6 +175,40 @@ const TimeTrackingPage = () => {
     });
   };
 
+  const handleBiometricToggle = () => {
+    setBiometricEnabled(!biometricEnabled);
+    toast({
+      title: !biometricEnabled ? "Biometric Authentication Enabled" : "Biometric Authentication Disabled",
+      description: !biometricEnabled 
+        ? "You can now use fingerprint for attendance" 
+        : "Fingerprint authentication has been disabled",
+    });
+  };
+
+  const handleFaceIdToggle = () => {
+    setFaceIdEnabled(!faceIdEnabled);
+    toast({
+      title: !faceIdEnabled ? "Face ID Authentication Enabled" : "Face ID Authentication Disabled",
+      description: !faceIdEnabled 
+        ? "You can now use Face ID for attendance" 
+        : "Face ID authentication has been disabled",
+    });
+  };
+
+  const handleBiometricAttendance = () => {
+    toast({
+      title: "Processing Biometric Attendance",
+      description: "Please place your finger on the scanner",
+    });
+    // Simulate biometric processing
+    setTimeout(() => {
+      toast({
+        title: "Attendance Recorded",
+        description: "Your attendance has been successfully recorded via biometric authentication",
+      });
+    }, 2000);
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="container mx-auto space-y-8">
@@ -179,6 +216,59 @@ const TimeTrackingPage = () => {
           <h1 className="text-4xl font-bold text-foreground mb-2">Time Tracking</h1>
           <p className="text-muted-foreground">Manage time entries, projects, and leave requests</p>
         </div>
+
+        {/* Biometric Configuration Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Biometric Authentication</CardTitle>
+            <CardDescription>Configure biometric attendance options</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Fingerprint className="h-5 w-5" />
+                    <span className="text-sm font-medium">Fingerprint Authentication</span>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    Enable fingerprint scanning for attendance
+                  </p>
+                </div>
+                <Switch
+                  checked={biometricEnabled}
+                  onCheckedChange={handleBiometricToggle}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Camera className="h-5 w-5" />
+                    <span className="text-sm font-medium">Face ID Authentication</span>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    Enable Face ID for attendance
+                  </p>
+                </div>
+                <Switch
+                  checked={faceIdEnabled}
+                  onCheckedChange={handleFaceIdToggle}
+                />
+              </div>
+
+              {(biometricEnabled || faceIdEnabled) && (
+                <Button 
+                  onClick={handleBiometricAttendance}
+                  className="w-full"
+                >
+                  <Fingerprint className="mr-2 h-4 w-4" />
+                  Record Attendance with Biometric
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Time Entry Section */}
         <Card>
