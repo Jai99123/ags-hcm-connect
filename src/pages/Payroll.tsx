@@ -30,9 +30,8 @@ const Payroll = () => {
   const [showTaxHistory, setShowTaxHistory] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [assignedTo, setAssignedTo] = useState<string>("financial_head");
+  const [assignedTo, setAssignedTo] = useState<string>("john_doe");
 
-  // Investment type states
   const [selectedInvestments, setSelectedInvestments] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
 
@@ -66,6 +65,13 @@ const Payroll = () => {
     { id: "declared", label: "Declaration submitted" },
     { id: "queryRaised", label: "Query raised" },
     { id: "resubmitted", label: "Resubmitted" },
+  ];
+
+  const payrollPersonnel = [
+    { id: "john_doe", name: "John Doe" },
+    { id: "jane_smith", name: "Jane Smith" },
+    { id: "mike_johnson", name: "Mike Johnson" },
+    { id: "sarah_williams", name: "Sarah Williams" }
   ];
 
   const handleViewPayslip = () => {
@@ -337,16 +343,19 @@ const Payroll = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="assignTo">Assign to</Label>
+                <Label htmlFor="assignTo">Assign to Payroll Personnel</Label>
                 <select
                   id="assignTo"
                   className="flex h-10 w-full max-w-md rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   value={assignedTo}
                   onChange={(e) => setAssignedTo(e.target.value)}
                 >
-                  <option value="financial_head">Financial Head</option>
-                  <option value="payroll_dept">Payroll Department</option>
-                  <option value="hr_team">HR Team</option>
+                  <option value="" disabled>Select a person</option>
+                  {payrollPersonnel.map(person => (
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
