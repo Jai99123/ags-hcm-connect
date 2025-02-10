@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -22,11 +23,25 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const Payroll = () => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [showTaxHistory, setShowTaxHistory] = useState(false);
+
+  // Investment type states
+  const [selectedInvestments, setSelectedInvestments] = useState<string[]>([]);
+
+  const investmentTypes = [
+    { id: "hra", label: "HRA" },
+    { id: "prevEmployer", label: "Previous Employer Income" },
+    { id: "houseProperty", label: "House Property" },
+    { id: "mediclaim", label: "Mediclaim - Excluding contribution made via Salary" },
+    { id: "nsc", label: "National Savings Certificate" },
+    { id: "nscInterest", label: "National Savings Certificate - Accrued Interest" },
+    { id: "nps", label: "National Pension Scheme (NPS) - Excluding contribution made via Salary" },
+  ];
 
   const handleViewPayslip = () => {
     toast.info("Payslip details will be available shortly");
@@ -162,7 +177,7 @@ const Payroll = () => {
         <CardHeader>
           <CardTitle>Tax submissions</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <p className="text-sm">
               My tax structure FY 2024-2025:{" "}
@@ -173,6 +188,58 @@ const Payroll = () => {
             <span className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full">
               Resubmission window open now
             </span>
+          </div>
+
+          {/* Submission/Updated date */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Submission/Updated date</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fromDate">From</Label>
+                <Input
+                  id="fromDate"
+                  type="date"
+                  placeholder="MM/DD/YYYY"
+                  value={startDate ? format(startDate, 'yyyy-MM-dd') : ''}
+                  onChange={(e) => setStartDate(new Date(e.target.value))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="toDate">To</Label>
+                <Input
+                  id="toDate"
+                  type="date"
+                  placeholder="MM/DD/YYYY"
+                  value={endDate ? format(endDate, 'yyyy-MM-dd') : ''}
+                  onChange={(e) => setEndDate(new Date(e.target.value))}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Investment type */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Investment type</h3>
+            <div className="space-y-3">
+              {investmentTypes.map((type) => (
+                <div key={type.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={type.id}
+                    checked={selectedInvestments.includes(type.id)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedInvestments([...selectedInvestments, type.id]);
+                      } else {
+                        setSelectedInvestments(
+                          selectedInvestments.filter((id) => id !== type.id)
+                        );
+                      }
+                    }}
+                  />
+                  <Label htmlFor={type.id}>{type.label}</Label>
+                </div>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
