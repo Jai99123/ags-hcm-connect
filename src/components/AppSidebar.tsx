@@ -1,13 +1,13 @@
 
 import {
-  Users,
-  Briefcase,
+  Home,
   UserPlus,
+  Users,
   Clock,
   CreditCard,
   GraduationCap,
+  Briefcase,
   MessageSquareMore,
-  Home,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,12 +23,12 @@ import { Link } from "react-router-dom";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, path: "/" },
-  { title: "Employees", icon: Users, path: "/employees" },
-  { title: "AGS Careers", icon: Briefcase, path: "/careers" },
   { title: "Hiring & Onboarding", icon: UserPlus, path: "/hiring-onboarding" },
+  { title: "Employee Information", icon: Users, path: "/employees" },
   { title: "Time Tracking", icon: Clock, path: "/time-tracking" },
   { title: "Payroll", icon: CreditCard, path: "/payroll" },
   { title: "LMS", icon: GraduationCap, path: "/lms" },
+  { title: "AGS Careers", icon: Briefcase, path: "/careers" },
   { title: "HR Bot", icon: MessageSquareMore, path: "/hr-bot" },
 ];
 
@@ -57,3 +57,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
