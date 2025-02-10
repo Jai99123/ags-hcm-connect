@@ -1,3 +1,4 @@
+
 import {
   Table,
   TableBody,
@@ -179,6 +180,7 @@ const Payroll = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
+      {/* First section - Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
@@ -273,6 +275,7 @@ const Payroll = () => {
         </Card>
       </div>
 
+      {/* Tax submissions section */}
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>Tax submissions</CardTitle>
@@ -425,6 +428,7 @@ const Payroll = () => {
         </CardContent>
       </Card>
 
+      {/* Tax History Dialog */}
       <Dialog open={showTaxHistory} onOpenChange={setShowTaxHistory}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -453,6 +457,7 @@ const Payroll = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Payslip Upload Dialog */}
       <Dialog open={showPayslipUpload} onOpenChange={setShowPayslipUpload}>
         <DialogContent>
           <DialogHeader>
@@ -473,6 +478,7 @@ const Payroll = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Tax Statement Dialog */}
       <Dialog open={showTaxStatement} onOpenChange={setShowTaxStatement}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -501,84 +507,84 @@ const Payroll = () => {
                     <Download className="h-4 w-4" />
                     Download Statement
                   </Button>
-                  )}
-                </div>
+                )}
               </div>
+            </div>
 
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Pay Structure</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Basic Pay</Label>
-                    <p className="text-lg">₹50,000</p>
-                  </div>
-                  <div>
-                    <Label>HRA</Label>
-                    <p className="text-lg">₹20,000</p>
-                  </div>
-                  <div>
-                    <Label>Special Allowance</Label>
-                    <p className="text-lg">₹15,000</p>
-                  </div>
-                  <div>
-                    <Label>Other Benefits</Label>
-                    <p className="text-lg">₹10,000</p>
-                  </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Pay Structure</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Basic Pay</Label>
+                  <p className="text-lg">₹50,000</p>
                 </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Tax Breakdown</h3>
-                <div className="space-y-4">
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <Label>Income Tax</Label>
-                    <p className="text-lg">₹25,000</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <Label>Professional Tax</Label>
-                    <p className="text-lg">₹2,500</p>
-                  </div>
-                  <div className="bg-gray-50 p-4 rounded-md">
-                    <Label>Surcharge</Label>
-                    <p className="text-lg">₹1,000</p>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-md">
-                    <Label>Tax Deductions (Section 80C)</Label>
-                    <p className="text-lg">-₹5,000</p>
-                  </div>
+                <div>
+                  <Label>HRA</Label>
+                  <p className="text-lg">₹20,000</p>
                 </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center">
-                  <Label className="text-lg font-semibold">Net Tax Payable</Label>
-                  <p className="text-xl font-bold">₹23,500</p>
+                <div>
+                  <Label>Special Allowance</Label>
+                  <p className="text-lg">₹15,000</p>
+                </div>
+                <div>
+                  <Label>Other Benefits</Label>
+                  <p className="text-lg">₹10,000</p>
                 </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
 
-        <Dialog open={showTaxStatementUpload} onOpenChange={setShowTaxStatementUpload}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Upload Tax Statement</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="flex flex-col gap-4">
-                <Label htmlFor="taxStatementFile">Select Tax Statement File</Label>
-                <Input
-                  id="taxStatementFile"
-                  type="file"
-                  onChange={handleTaxStatementUpload}
-                  accept=".pdf,.doc,.docx"
-                />
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Tax Breakdown</h3>
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <Label>Income Tax</Label>
+                  <p className="text-lg">₹25,000</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <Label>Professional Tax</Label>
+                  <p className="text-lg">₹2,500</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <Label>Surcharge</Label>
+                  <p className="text-lg">₹1,000</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-md">
+                  <Label>Tax Deductions (Section 80C)</Label>
+                  <p className="text-lg">-₹5,000</p>
+                </div>
               </div>
-              <Button onClick={() => setShowTaxStatementUpload(false)}>Done</Button>
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+
+            <div className="border-t pt-4">
+              <div className="flex justify-between items-center">
+                <Label className="text-lg font-semibold">Net Tax Payable</Label>
+                <p className="text-xl font-bold">₹23,500</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tax Statement Upload Dialog */}
+      <Dialog open={showTaxStatementUpload} onOpenChange={setShowTaxStatementUpload}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Tax Statement</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4">
+              <Label htmlFor="taxStatementFile">Select Tax Statement File</Label>
+              <Input
+                id="taxStatementFile"
+                type="file"
+                onChange={handleTaxStatementUpload}
+                accept=".pdf,.doc,.docx"
+              />
+            </div>
+            <Button onClick={() => setShowTaxStatementUpload(false)}>Done</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
