@@ -74,6 +74,17 @@ const LMS = () => {
       return;
     }
 
+    // Validate file types
+    if (type === 'video' && !file.type.startsWith('video/')) {
+      toast.error("Please select a valid video file");
+      return;
+    }
+
+    if (type === 'document' && !['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type)) {
+      toast.error("Please select a PDF or Word document");
+      return;
+    }
+
     if (!materialTitle.trim()) {
       toast.error("Please enter a title for the material");
       return;
