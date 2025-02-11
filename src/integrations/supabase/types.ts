@@ -146,6 +146,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          manager_comments: string | null
           position_id: string | null
           resume_url: string
           status: string | null
@@ -156,6 +157,7 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          manager_comments?: string | null
           position_id?: string | null
           resume_url: string
           status?: string | null
@@ -166,6 +168,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          manager_comments?: string | null
           position_id?: string | null
           resume_url?: string
           status?: string | null
