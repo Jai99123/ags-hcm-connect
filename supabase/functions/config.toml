@@ -1,0 +1,5 @@
+
+project_id = "qhezhlnivhtfapqkdvqm"
+
+[[fetch.files]]
+path = "functions/upload-learning-material/index.ts"

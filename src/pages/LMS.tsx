@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,8 @@ const LMS = () => {
   const [ideaTitle, setIdeaTitle] = useState("");
   const [ideaDescription, setIdeaDescription] = useState("");
   const [department, setDepartment] = useState("");
+  const [materialTitle, setMaterialTitle] = useState("");
+  const [materialDescription, setMaterialDescription] = useState("");
 
   const { data: currentUserProfile } = useQuery({
     queryKey: ['current-user-profile'],
@@ -46,10 +49,57 @@ const LMS = () => {
     }
   });
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const { data: learningMaterials, refetch: refetchMaterials } = useQuery({
+    queryKey: ['learning-materials'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('learning_materials')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'video' | 'document') => {
+    if (!currentUserProfile) {
+      toast.error("You must be logged in to upload materials");
+      return;
+    }
+
     const file = event.target.files?.[0];
-    if (file) {
-      toast.success("File uploaded successfully!");
+    if (!file) {
+      toast.error("No file selected");
+      return;
+    }
+
+    if (!materialTitle.trim()) {
+      toast.error("Please enter a title for the material");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('title', materialTitle);
+    formData.append('description', materialDescription);
+    formData.append('type', type);
+    formData.append('uploaderId', currentUserProfile.id);
+
+    try {
+      const { error } = await supabase.functions.invoke('upload-learning-material', {
+        body: formData,
+      });
+
+      if (error) throw error;
+
+      toast.success("Material uploaded successfully!");
+      setMaterialTitle("");
+      setMaterialDescription("");
+      refetchMaterials();
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error("Failed to upload material");
     }
   };
 
@@ -100,46 +150,62 @@ const LMS = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                  Course Management
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Course
-                  </Button>
+                  Upload Learning Materials
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="course-title">Course Title</Label>
-                    <Input id="course-title" placeholder="Enter course title" />
+                    <Label htmlFor="material-title">Material Title</Label>
+                    <Input
+                      id="material-title"
+                      placeholder="Enter material title"
+                      value={materialTitle}
+                      onChange={(e) => setMaterialTitle(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="course-description">Description</Label>
-                    <Textarea id="course-description" placeholder="Enter course description" />
+                    <Label htmlFor="material-description">Description</Label>
+                    <Textarea
+                      id="material-description"
+                      placeholder="Enter material description"
+                      value={materialDescription}
+                      onChange={(e) => setMaterialDescription(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label>Upload Course Materials</Label>
+                    <Label>Upload Materials</Label>
                     <div className="grid grid-cols-2 gap-4">
-                      <Button variant="outline" className="w-full">
-                        <FileVideo className="mr-2 h-4 w-4" />
-                        Upload Video
+                      <div>
                         <Input
                           type="file"
                           className="hidden"
+                          id="video-upload"
                           accept="video/*"
-                          onChange={handleFileUpload}
+                          onChange={(e) => handleFileUpload(e, 'video')}
                         />
-                      </Button>
-                      <Button variant="outline" className="w-full">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload Documents
+                        <label htmlFor="video-upload">
+                          <Button variant="outline" className="w-full cursor-pointer">
+                            <FileVideo className="mr-2 h-4 w-4" />
+                            Upload Video
+                          </Button>
+                        </label>
+                      </div>
+                      <div>
                         <Input
                           type="file"
                           className="hidden"
+                          id="document-upload"
                           accept=".pdf,.doc,.docx"
-                          onChange={handleFileUpload}
+                          onChange={(e) => handleFileUpload(e, 'document')}
                         />
-                      </Button>
+                        <label htmlFor="document-upload">
+                          <Button variant="outline" className="w-full cursor-pointer">
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload Documents
+                          </Button>
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -148,21 +214,32 @@ const LMS = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Available Courses</CardTitle>
+                <CardTitle>Available Materials</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4">
-                  {/* Example course items */}
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <Book className="h-6 w-6" />
-                      <div>
-                        <h3 className="font-semibold">Introduction to HR Policies</h3>
-                        <p className="text-sm text-gray-500">12 videos • 5 documents</p>
+                  {learningMaterials?.map((material) => (
+                    <div key={material.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-4">
+                        {material.type === 'video' ? (
+                          <FileVideo className="h-6 w-6" />
+                        ) : (
+                          <Book className="h-6 w-6" />
+                        )}
+                        <div>
+                          <h3 className="font-semibold">{material.title}</h3>
+                          {material.description && (
+                            <p className="text-sm text-gray-500">{material.description}</p>
+                          )}
+                        </div>
                       </div>
+                      <Button variant="secondary" asChild>
+                        <a href={material.content_url} target="_blank" rel="noopener noreferrer">
+                          View Material
+                        </a>
+                      </Button>
                     </div>
-                    <Button variant="secondary">View Course</Button>
-                  </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
